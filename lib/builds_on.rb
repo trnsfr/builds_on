@@ -3,24 +3,26 @@ module BuildsOn
   def builds_on(name, options={})
     name = name.to_s
     options[:destroy_associations] ||= true
-    options[:field_to_be_skipped_if_blank] ||= nil
+    fields_to_be_skipped_if_blank = [options[:fields_to_be_skipped_if_blank]].flatten.compact
 
     define_method "#{name}_attributes=" do |new_attributes|
-
+      assoc = send(:"#{name.pluralize}")
+      
       # Destroy all previous associations
       #
-      eval("self.#{name.pluralize}.each{ |o| o.destroy }") if options[:destroy_associations]
+      assoc.each(&:destroy) if options[:destroy_associations]
       
       # Clear out any attributes that were left blank
       #
-      new_attributes.delete_if{ |e| e[options[:field_to_be_skipped_if_blank]].blank? } unless options[:field_to_be_skipped_if_blank].nil?
+      unless fields_to_be_skipped_if_blank.empty?
+        new_attributes.delete_if do |e|
+          fields_to_be_skipped_if_blank.all?{ |field| e[field].blank? }
+        end
+      end
 
       # Build each child
       #
-      for data in new_attributes
-        eval("self.#{name.pluralize}.build(data)")
-      end
-
+      new_attributes.each{ |data| assoc.build(data) }
     end
   end
 
