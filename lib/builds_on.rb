@@ -16,7 +16,7 @@ module BuildsOn
       #
       unless fields_to_be_skipped_if_blank.empty?
         new_attributes.delete_if do |e|
-          fields_to_be_skipped_if_blank.all?{ |field| e[field].blank? }
+          fields_to_be_skipped_if_blank.all?{ |field| e[field.to_sym].blank? }
         end
       end
 
