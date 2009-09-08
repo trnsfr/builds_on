@@ -7,7 +7,8 @@ module BuildsOn
 
     define_method "#{name}_attributes=" do |new_attributes|
       assoc = send(:"#{name.pluralize}")
-      
+      new_attributes = new_attributes.map{ |attrs| attrs.symbolize_keys  }
+
       # Destroy all previous associations
       #
       assoc.each(&:destroy) if options[:destroy_associations]
